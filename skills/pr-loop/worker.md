@@ -77,12 +77,16 @@ the project's gate, fix it, commit, and push. Inspect logs with
 the code, don't weaken the check.
 
 **Reviews** — read them with `gh pr view <n> --json reviews,comments,reviewThreads`.
-Address each in code, commit, push, and reply to each thread explaining how you
-handled it (leave resolving the thread to the reviewer):
+Address each in code, commit, and push. Then **reply to every reviewer comment**
+explaining how you handled it (or asking a clarifying question if you disagree or
+are unsure) — leave no comment unanswered:
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/<n>/comments/<commentId>/replies -f body="..."
 ```
+
+**Do not resolve the threads yourself.** Reply, but leave every thread open —
+resolving each comment is the **reviewer's** call, not yours.
 
 ## Report back
 
