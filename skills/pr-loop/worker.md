@@ -57,9 +57,19 @@ during long stretches with nothing to do; don't exit just because the work looks
 finished or you've reported your status.
 
 Keep watching your PR the whole time, using your harness's background/monitor
-capability or a poll loop. Track what you've already handled (last-seen head
-commit SHA, last-seen comment ids) so you don't redo work and so you notice each
-new event.
+capability or a poll loop. Watch for **three** independent things — don't wait on
+CI alone:
+
+- new or changed **CI / check** results,
+- new **review comments, review threads, and reviews**,
+- the PR's **merge / close** state.
+
+Review comments arrive on their own schedule — often when CI is already green and
+the PR is already mergeable — so every poll cycle must re-read the review threads
+(`gh pr view <n> --json reviews,comments,reviewThreads`), not just the check
+status or mergeability. Track what you've already handled (last-seen head commit
+SHA, last-seen comment ids) so you don't redo work and so you notice each new
+event.
 
 **CI** — list checks with `gh pr checks <n>`. Reproduce a failure locally with
 the project's gate, fix it, commit, and push. Inspect logs with
