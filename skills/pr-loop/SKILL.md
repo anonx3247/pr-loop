@@ -44,7 +44,12 @@ Then spin off a **backgrounded subagent** for that worktree and hand it a
 self-contained brief: the branch, the base, the stacking mode, the goal,
 the files/areas involved, how to verify (the project's build/test/lint), and a
 pointer to [worker.md](worker.md). Background it however your harness backgrounds
-a subagent, and move on to the next PR — don't block on any one of them.
+a subagent, and immediately move on to dispatch the next PR.
+
+These subagents run **concurrently**, not one after another — you don't wait for
+one to finish before starting the next. (Stacks must be *dispatched* in
+dependency order so each PR's base exists, but once dispatched they all run at
+the same time.) Many subagents are alive at once, each owning its own PR.
 
 For a stack, give each subagent the previous PR's branch as its base, and never
 dispatch a PR whose base hasn't been dispatched yet.
@@ -56,7 +61,16 @@ simplify pass over its own diff, opens the PR, and then watches that PR — fixi
 CI failures and addressing review comments — until it merges or closes
 ([worker.md](worker.md)).
 
-Meanwhile you watch the set and coordinate:
+A subagent that has finished writing code is **not done**. Review comments and CI
+results keep arriving long after the diff looks complete, and each subagent must
+**stay alive and keep reacting to its own PR's events automatically**, without
+you prompting it. So a subagent only really finishes when its PR **merges or
+closes** — keep every one of them running in the background while you dispatch
+and shepherd the rest. Do not shut a subagent down just because it reported a
+result or has nothing to do right now.
+
+Meanwhile you watch the set and coordinate the things a single subagent can't do
+on its own:
 
 ```bash
 gh pr list --author "@me" --state all --json number,title,state,headRefName
@@ -65,8 +79,9 @@ gh pr list --author "@me" --state all --json number,title,state,headRefName
 - When a PR **merges**, the next entry in its stack is unblocked — sync/restack
   it (`gt sync` for Graphite, or retarget + rebase for a manual stack) so it now
   targets the trunk, then proceed up the stack.
-- When a subagent **finishes**, record what it did and start any follow-up.
 - If a subagent goes the wrong way, steer it or stop and re-dispatch.
+- The day-to-day review/CI reactions need no involvement from you — each subagent
+  handles its own.
 
 Merge stacks **bottom-up**.
 

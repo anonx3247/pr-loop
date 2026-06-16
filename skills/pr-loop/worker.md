@@ -49,9 +49,17 @@ See [gt-graphite.md](gt-graphite.md) for the full Graphite workflow.
 
 ## Iterate until it lands
 
-Keep watching your PR until it reaches a terminal state, using your harness's
-background/monitor capability or a poll loop. Track what you've already handled
-(last-seen head commit SHA, last-seen comment ids) so you don't redo work.
+Opening the PR does **not** mean you are done. Review comments and CI results
+keep arriving after your diff looks complete, and you are responsible for
+reacting to them **automatically** — the orchestrator will not prompt you, and is
+busy with other PRs. **Stay alive until your PR actually merges or closes**, even
+during long stretches with nothing to do; don't exit just because the work looks
+finished or you've reported your status.
+
+Keep watching your PR the whole time, using your harness's background/monitor
+capability or a poll loop. Track what you've already handled (last-seen head
+commit SHA, last-seen comment ids) so you don't redo work and so you notice each
+new event.
 
 **CI** — list checks with `gh pr checks <n>`. Reproduce a failure locally with
 the project's gate, fix it, commit, and push. Inspect logs with
@@ -68,8 +76,10 @@ gh api repos/{owner}/{repo}/pulls/<n>/comments/<commentId>/replies -f body="..."
 
 ## Report back
 
-As your final step, return a concise result to the orchestrator: branch, PR
-number + url, what you did, how you verified it, and any follow-ups.
+Once the PR is open, report a concise status to the orchestrator (branch, PR
+number + url, what you did, how you verified it, follow-ups) — but treat this as
+a status update, **not** your exit. Keep running and watching the PR per the
+section above; only truly finish once it has merged or closed.
 
 You may spin off a focused helper subagent for a sub-task, two levels deep at
 most.
