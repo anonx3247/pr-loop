@@ -57,8 +57,21 @@ during long stretches with nothing to do; don't exit just because the work looks
 finished or you've reported your status.
 
 Keep watching your PR the whole time, using your harness's background/monitor
-capability or a poll loop. Watch for **three** independent things — don't wait on
-CI alone:
+capability or a poll loop. **Never block on a bare `sleep`** to wait for CI,
+checks, or new comments — a fixed sleep either wakes too early (nothing changed)
+or too late (you sat idle while the event was ready). Instead, wait on the
+*condition*:
+
+- Prefer your harness's **monitor / event** mechanism so you're woken the moment
+  a check completes, a comment lands, or the merge state flips.
+- If you must poll, **wait on a condition, not a duration** — block in an `until`
+  loop that returns only when something actionable has happened, e.g.
+  `until gh pr checks <n> | grep -qvE 'pending|in_progress'; do sleep 15; done`
+  (the short sleep here is the poll interval *inside* a condition gate, not a
+  blind wait for a guessed amount of time).
+- Re-check all three signals each time you wake, then act.
+
+Watch for **three** independent things — don't wait on CI alone:
 
 - new or changed **CI / check** results,
 - new **review comments, review threads, and reviews**,

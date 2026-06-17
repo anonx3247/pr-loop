@@ -70,7 +70,13 @@ and shepherd the rest. Do not shut a subagent down just because it reported a
 result or has nothing to do right now.
 
 Meanwhile you watch the set and coordinate the things a single subagent can't do
-on its own:
+on its own. While the subagents work, **do not block on a bare `sleep`** waiting
+for them or for CI — a fixed delay just guesses wrong in both directions. Wait on
+the *condition* instead: use your harness's monitor/event mechanism to be woken
+when a PR's state changes, or poll with an `until` loop that returns only once
+something actionable has happened (a PR merged, a check finished, a subagent went
+idle). The short sleep inside such a loop is a poll interval gated by a
+condition, never a blind wait.
 
 ```bash
 gh pr list --author "@me" --state all --json number,title,state,headRefName
